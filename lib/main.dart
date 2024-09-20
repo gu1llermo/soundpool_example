@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:soundpool/soundpool.dart';
+import 'package:soundpool_example/volume.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,17 +33,24 @@ class HomeView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-                onPressed: () {
-                  PlaySound.beep1();
-                  // beep1 es el elegido, es el sonido que más se parece a los lectores
-                  // de código de barras
-                },
-                child: const Text('beep1')),
+              onPressed: () async {
+                double volume = await Volume.getCurrentVolume();
+                PlaySound.beep1(volume: volume);
+                // debugPrint('Volume: $volume');
+                // beep1 es el elegido, es el sonido que más se parece a los lectores
+                // de código de barras
+              },
+              child: const Text('beep1'),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
-                onPressed: () {
-                  PlaySound.beep2();
-                },
-                child: const Text('beep2')),
+              onPressed: () async {
+                double volume = await Volume.getCurrentVolume();
+                PlaySound.beep2(volume: volume);
+                // debugPrint('Volume: $volume');
+              },
+              child: const Text('beep2'),
+            ),
           ],
         ),
       ),
@@ -54,10 +62,12 @@ class PlaySound {
   static late Soundpool _pool;
   static late int _beep1Id;
   static late int _beep2Id;
+  static double _volumeBeep1 = 1.0;
+  static double _volumeBeep2 = 1.0;
 
   static void _initPool() {
     const soundpoolOptions = SoundpoolOptions(
-      streamType: StreamType.notification,
+      streamType: StreamType.music,
     );
     _pool = Soundpool.fromOptions(options: soundpoolOptions);
   }
@@ -82,11 +92,20 @@ class PlaySound {
     return await _pool.load(asset);
   }
 
-  static void beep1() {
+  static void beep1({double volume = 1.0}) {
+    if (_volumeBeep1 != volume) {
+      _volumeBeep1 = volume;
+      _pool.setVolume(soundId: _beep1Id, volume: volume);
+    }
+
     _pool.play(_beep1Id);
   }
 
-  static void beep2() {
+  static void beep2({double volume = 1.0}) {
+    if (_volumeBeep2 != volume) {
+      _volumeBeep2 = volume;
+      _pool.setVolume(soundId: _beep2Id, volume: volume);
+    }
     _pool.play(_beep2Id);
   }
 }

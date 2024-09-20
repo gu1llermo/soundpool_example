@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  real_volume: ^1.0.9
   soundpool: ^2.4.1
 
 dev_dependencies:
